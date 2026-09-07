@@ -353,6 +353,13 @@
 </div>
 
 <script>
+/* ==========================================================
+   設定：把 Apps Script 網頁應用程式網址貼在這裡（結尾 /exec），
+   之後任何裝置打開都會自動使用，不用再手動貼。
+   留空則維持原本在頁面上手動填的方式。
+   ========================================================== */
+const DEFAULT_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbzdQeT2cMm1haCqko0DBHIsoXDXiGoL_Ol6WK0wcxU6dA8DMXoO5P1KM22lvK5Rn3bp/exec';
+
 /* ---------- 食材庫資料：kcal / 蛋白 / 碳水 每 100g（或每份） ---------- */
 /* unit: 'g' 以克計；'份' 以份數計（step=1），per 為每份數值 */
 const FOODS = [
@@ -758,6 +765,9 @@ function renderCharts(){
 
 /* ---------- 雲端同步 ---------- */
 let cloudUrl = load(KEY_URL,'');
+// 優先順序：網址參數 ?cloud=… > 頁面上手動存的 > 程式裡寫死的
+try{const qp=new URLSearchParams(location.search).get('cloud'); if(qp){cloudUrl=qp.trim(); store(KEY_URL,cloudUrl);} }catch(e){}
+if(!cloudUrl && DEFAULT_CLOUD_URL){ cloudUrl=DEFAULT_CLOUD_URL; }
 let queue = load(KEY_QUEUE,[]);   // [{action:'add'|'delete', entry|ts}]
 function setStatus(t){document.getElementById('cloudStatus').textContent=t;}
 function saveCloudUrl(){
@@ -837,7 +847,7 @@ window.addEventListener('online',()=>{resolvePending();});
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
-if(cloudUrl){setStatus('已設定，開啟時自動同步');syncCloud();}else setStatus('未設定，僅存本機');
+if(cloudUrl){setStatus(cloudUrl===DEFAULT_CLOUD_URL?'使用內建網址，開啟時自動同步':'已設定，開啟時自動同步');syncCloud();}else setStatus('未設定，僅存本機');
 </script>
 </body>
 </html>
