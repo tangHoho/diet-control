@@ -220,14 +220,10 @@
 <!-- ===== 飲控紀錄 ===== -->
 <section id="log">
   <h2>飲控紀錄</h2>
-  <p class="note">按組合區的「紀錄」會把那一餐存進這支手機／瀏覽器裡（localStorage），下次打開還在。清除瀏覽器資料會一起清掉，所以請定期「匯出備份」。</p>
+  <p class="note">按組合區的「紀錄」會存進本機並同步到 Google 試算表。同步網址已內建在程式裡（index.html 開頭的 DEFAULT_CLOUD_URL），不需手動設定。</p>
   <div class="stats" id="logStats"></div>
   <div class="cloud">
     <h3>雲端同步（Google 試算表）</h3>
-    <div class="actions" style="margin-top:6px">
-      <input id="cloudUrl" placeholder="貼上 Apps Script 網頁應用程式網址（…/exec）">
-      <button class="btn small" onclick="saveCloudUrl()">儲存</button>
-    </div>
     <div class="actions" style="margin-top:8px">
       <button class="btn ghost small" onclick="syncCloud()">立即同步</button>
       <span class="note" id="cloudStatus" style="align-self:center"></span>
@@ -358,7 +354,7 @@
    之後任何裝置打開都會自動使用，不用再手動貼。
    留空則維持原本在頁面上手動填的方式。
    ========================================================== */
-const DEFAULT_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbzdQeT2cMm1haCqko0DBHIsoXDXiGoL_Ol6WK0wcxU6dA8DMXoO5P1KM22lvK5Rn3bp/exec';
+const DEFAULT_CLOUD_URL = '';
 
 /* ---------- 食材庫資料：kcal / 蛋白 / 碳水 每 100g（或每份） ---------- */
 /* unit: 'g' 以克計；'份' 以份數計（step=1），per 為每份數值 */
@@ -542,7 +538,7 @@ async function addExtra(){
       renderMeal(); return;
     }catch(e){ st.textContent='估算失敗（'+e.message+'），先留空，同步時再補算。'; }
   }else{
-    st.textContent = '尚未設定雲端網址，無法自動估算；可以在上方手動填數字。';
+    st.textContent = '尚未設定 DEFAULT_CLOUD_URL，無法自動估算；可以在上方手動填數字。';
   }
   parts.forEach(pn=>meal.push({cid:'c'+Date.now()+Math.random().toString(36).slice(2,6),n:pn,u:'份',amt:1,k:0,p:0,cb:0,pending:true,src:pn}));
   document.getElementById('extraText').value='';
@@ -764,18 +760,11 @@ function renderCharts(){
 }
 
 /* ---------- 雲端同步 ---------- */
-let cloudUrl = load(KEY_URL,'');
-// 優先順序：網址參數 ?cloud=… > 頁面上手動存的 > 程式裡寫死的
+// 網址來源：程式裡寫死的 DEFAULT_CLOUD_URL；也可用 ?cloud=… 參數臨時覆蓋（會記住）
+let cloudUrl = DEFAULT_CLOUD_URL || load(KEY_URL,'');
 try{const qp=new URLSearchParams(location.search).get('cloud'); if(qp){cloudUrl=qp.trim(); store(KEY_URL,cloudUrl);} }catch(e){}
-if(!cloudUrl && DEFAULT_CLOUD_URL){ cloudUrl=DEFAULT_CLOUD_URL; }
 let queue = load(KEY_QUEUE,[]);   // [{action:'add'|'delete', entry|ts}]
 function setStatus(t){document.getElementById('cloudStatus').textContent=t;}
-function saveCloudUrl(){
-  cloudUrl=document.getElementById('cloudUrl').value.trim();
-  store(KEY_URL,cloudUrl);
-  setStatus(cloudUrl?'已儲存，按「立即同步」測試':'已清除');
-  if(cloudUrl) syncCloud();
-}
 async function cloudPost(body){
   const r=await fetch(cloudUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),redirect:'follow'});
   return r.json();
@@ -790,7 +779,7 @@ async function flushQueue(){
   queue=[];store(KEY_QUEUE,queue);
 }
 async function syncCloud(){
-  if(!cloudUrl){setStatus('尚未設定網址');return;}
+  if(!cloudUrl){setStatus('尚未設定 DEFAULT_CLOUD_URL');return;}
   setStatus('同步中…');
   try{
     await flushQueue();
@@ -842,12 +831,11 @@ function loadDay(di,mi){
 }
 
 renderTabs();renderLib();renderMeal();renderDays();renderSaved();renderLog();
-document.getElementById('cloudUrl').value=cloudUrl;
 window.addEventListener('online',()=>{resolvePending();});
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
-if(cloudUrl){setStatus(cloudUrl===DEFAULT_CLOUD_URL?'使用內建網址，開啟時自動同步':'已設定，開啟時自動同步');syncCloud();}else setStatus('未設定，僅存本機');
+if(cloudUrl){setStatus('開啟時自動同步');syncCloud();}else setStatus('尚未設定 DEFAULT_CLOUD_URL，目前僅存本機');
 </script>
 </body>
 </html>
