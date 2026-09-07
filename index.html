@@ -227,7 +227,7 @@
 <!-- ===== 飲控紀錄 ===== -->
 <section id="log">
   <h2>飲控紀錄</h2>
-  <p class="note">按組合區的「紀錄」會存進本機並同步到 Google 試算表。同步網址已內建在程式裡（index.html 開頭的 DEFAULT_CLOUD_URL），不需手動設定。</p>
+  <p class="note">按組合區的「紀錄」會存進本機並同步到 Google 試算表。同步網址由 config.js 提供，不需在頁面上設定。</p>
   <div class="stats" id="logStats"></div>
   <div class="cloud">
     <h3>雲端同步（Google 試算表）</h3>
@@ -355,13 +355,11 @@
 <footer>減脂期參考版．依實際體重變化與訓練量微調份量</footer>
 </div>
 
+<script src="config.js"></script>
 <script>
-/* ==========================================================
-   設定：把 Apps Script 網頁應用程式網址貼在這裡（結尾 /exec），
-   之後任何裝置打開都會自動使用，不用再手動貼。
-   留空則維持原本在頁面上手動填的方式。
-   ========================================================== */
-const DEFAULT_CLOUD_URL = '';
+/* 雲端網址由 config.js 提供（window.APP_CONFIG.cloudUrl）。
+   config.js 只需建立一次，之後更新 index.html 都不會動到它。 */
+const DEFAULT_CLOUD_URL = (window.APP_CONFIG && window.APP_CONFIG.cloudUrl) || '';
 
 /* ---------- 食材庫資料：kcal / 蛋白 / 碳水 每 100g（或每份） ---------- */
 /* unit: 'g' 以克計；'份' 以份數計（step=1），per 為每份數值 */
@@ -545,7 +543,7 @@ async function addExtra(){
       renderMeal(); return;
     }catch(e){ st.textContent='估算失敗（'+e.message+'），先留空，同步時再補算。'; }
   }else{
-    st.textContent = '尚未設定 DEFAULT_CLOUD_URL，無法自動估算；可以在上方手動填數字。';
+    st.textContent = '找不到 config.js 的 cloudUrl，無法自動估算；可以在上方手動填數字。';
   }
   parts.forEach(pn=>meal.push({cid:'c'+Date.now()+Math.random().toString(36).slice(2,6),n:pn,u:'份',amt:1,k:0,p:0,cb:0,pending:true,src:pn}));
   document.getElementById('extraText').value='';
@@ -786,7 +784,7 @@ async function flushQueue(){
   queue=[];store(KEY_QUEUE,queue);
 }
 async function syncCloud(){
-  if(!cloudUrl){setStatus('尚未設定 DEFAULT_CLOUD_URL');return;}
+  if(!cloudUrl){setStatus('找不到 config.js 的 cloudUrl');return;}
   setStatus('同步中…');
   try{
     await flushQueue();
@@ -842,7 +840,7 @@ window.addEventListener('online',()=>{resolvePending();});
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
-if(cloudUrl){setStatus('開啟時自動同步');syncCloud();}else setStatus('尚未設定 DEFAULT_CLOUD_URL，目前僅存本機');
+if(cloudUrl){setStatus('開啟時自動同步');syncCloud();}else setStatus('找不到 config.js 的 cloudUrl，目前僅存本機');
 </script>
 </body>
 </html>

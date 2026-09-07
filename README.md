@@ -7,3 +7,7 @@
 5. 之後更新 index.html 時，把 sw.js 裡的 VERSION 改一下（v1 → v2），手機重開 App 就會拿到新版。
 
 雲端同步網址和紀錄存在 App 自己的儲存空間，跟原本 file:// 開的版本不共用，第一次要重新貼一次 Apps Script 網址。
+
+## 雲端網址設定
+`config.js` 裡填 Apps Script 的 /exec 網址，只需填一次。
+之後從 Claude 拿到新的 index.html 直接覆蓋即可，config.js 不會被動到。

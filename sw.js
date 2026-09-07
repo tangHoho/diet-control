@@ -2,7 +2,7 @@
 // 每次更新 index.html 時把 VERSION 加 1，手機重新開啟就會拿到新版。
 const VERSION = 'v2';
 const CACHE = 'meal-app-' + VERSION;
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
+const ASSETS = ['./', './index.html', './config.js', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
