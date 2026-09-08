@@ -38,6 +38,25 @@
   .row.between{justify-content:space-between}
   .stack{display:flex;flex-direction:column;gap:8px}
 
+  /* 登入 / 引導 */
+  body.gate .tabbar{display:none}
+  .gate-page{min-height:100vh;display:flex;flex-direction:column;justify-content:center;max-width:420px;margin:0 auto;padding:40px 24px calc(40px + env(safe-area-inset-bottom))}
+  .logo{width:96px;height:96px;border-radius:24px;background:#000;border:2px solid var(--orange);display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+  .logo svg{width:64px;height:64px}
+  .gate-title{font-size:30px;font-weight:800;color:#fff;text-align:center;margin:0}
+  .gate-sub{color:var(--muted);text-align:center;margin:8px 0 28px;font-size:14px}
+  .gbtn{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#111;font-weight:700;padding:14px;border-radius:12px;width:100%;font-size:16px}
+  .gbtn svg{width:20px;height:20px}
+  .steps{display:flex;gap:6px;margin:0 0 16px}
+  .steps i{flex:1;height:4px;border-radius:4px;background:var(--line)} .steps i.on{background:var(--orange)}
+  .form .kv{align-items:center}
+  .seg{display:flex;gap:6px;flex-wrap:wrap}
+  .seg button{padding:8px 12px;border-radius:10px;background:var(--panel2);font-size:14px}
+  .seg button.on{background:var(--orange);color:#000;font-weight:700}
+  .numin{width:92px;text-align:center}
+  .result{background:var(--panel);border-radius:14px;padding:16px;text-align:center;margin-bottom:12px}
+  .result b{display:block;font-size:34px;color:var(--orange);line-height:1.1}
+  .result span{color:var(--muted);font-size:13px}
   /* 底部分頁 */
   .tabbar{position:fixed;left:0;right:0;bottom:0;height:calc(var(--tab-h) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);
     background:#0a0a0a;border-top:1px solid var(--line);display:flex;z-index:50}
@@ -165,6 +184,54 @@
 </head>
 <body>
 
+<!-- ================= 登入 ================= -->
+<section class="page gate-page" id="page-login">
+  <div class="logo"><svg viewBox="0 0 512 512"><circle cx="256" cy="256" r="168" fill="none" stroke="#2a2a2a" stroke-width="34"/><path d="M256,88 A168,168 0 1 1 88,256" fill="none" stroke="#ff7a1a" stroke-width="34" stroke-linecap="round"/><rect x="176" y="214" width="160" height="34" rx="17" fill="#ff7a1a"/><rect x="176" y="270" width="110" height="34" rx="17" fill="#ff7a1a" opacity=".55"/></svg></div>
+  <h1 class="gate-title">DailyControl</h1>
+  <p class="gate-sub">每日飲食控制。登入後紀錄會保存在你的帳號，換手機也在。</p>
+  <button class="gbtn" id="googleBtn" onclick="authAction()"><svg viewBox="0 0 24 24"><path fill="#EA4335" d="M12 10.2v3.9h5.4c-.2 1.3-1.6 3.8-5.4 3.8-3.3 0-5.9-2.7-5.9-6s2.6-6 5.9-6c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.3 14.6 2.4 12 2.4 6.7 2.4 2.4 6.7 2.4 12S6.7 21.6 12 21.6c5.5 0 9.2-3.9 9.2-9.4 0-.6-.1-1.1-.2-1.6H12z"/></svg>使用 Google 登入</button>
+  <div class="muted" id="loginStatus" style="text-align:center;margin-top:14px;min-height:20px"></div>
+  <button class="btn ghost sm" id="localModeBtn" style="margin:18px auto 0;display:none" onclick="enterLocalMode()">先以本機模式試用</button>
+</section>
+
+<!-- ================= 初次設定 ================= -->
+<section class="page gate-page" id="page-onboard" style="justify-content:flex-start;padding-top:calc(24px + env(safe-area-inset-top))">
+  <div class="steps"><i class="on"></i><i id="stepDot2"></i></div>
+  <div id="ob1">
+    <h2 style="margin-bottom:4px">先設定你的目標</h2>
+    <p class="muted" style="margin:0 0 14px">用來計算每日熱量和每餐蛋白質，之後在「幫助 → 餐次與目標設定」隨時可改。</p>
+    <div class="card form">
+      <div class="kv"><div>一天吃幾餐</div><div class="seg" id="obMeals"></div></div>
+      <div class="kv"><div>性別<small>影響基礎代謝公式</small></div><div class="seg" id="obSex"><button data-v="m">男</button><button data-v="f">女</button></div></div>
+      <div class="kv"><div>年齡</div><input class="field numin" type="number" inputmode="numeric" id="obAge" placeholder="歲"></div>
+      <div class="kv"><div>身高</div><input class="field numin" type="number" inputmode="decimal" id="obH" placeholder="cm"></div>
+      <div class="kv"><div>目前體重</div><input class="field numin" type="number" inputmode="decimal" id="obW" placeholder="kg"></div>
+      <div class="kv"><div>目標體重</div><input class="field numin" type="number" inputmode="decimal" id="obT" placeholder="kg"></div>
+      <div class="kv"><div>平常活動量<small>不含刻意運動的日常</small></div><div class="seg" id="obAct"><button data-v="1.2">久坐</button><button data-v="1.375">偶爾動</button><button data-v="1.55">常走動</button><button data-v="1.725">體力活</button></div></div>
+      <div class="kv"><div>每週運動<small>重訓、跑步等</small></div><div class="seg" id="obEx"><button data-v="0">0 次</button><button data-v="1">1–2 次</button><button data-v="2">3–4 次</button><button data-v="3">5 次以上</button></div></div>
+      <div class="kv"><div>減重速度<small>越快越難維持肌肉</small></div><div class="seg" id="obPace"><button data-v="300">溫和</button><button data-v="500">標準</button><button data-v="700">積極</button></div></div>
+    </div>
+    <div class="muted" id="obErr" style="min-height:18px;margin:4px 0"></div>
+    <button class="btn" onclick="obCalc()">計算目標</button>
+  </div>
+  <div id="ob2" style="display:none">
+    <h2 style="margin-bottom:4px">你的每日目標</h2>
+    <p class="muted" style="margin:0 0 14px" id="obExplain"></p>
+    <div class="metrics" style="margin-bottom:12px">
+      <div class="result"><b id="obKcal">0</b><span>kcal / 天</span></div>
+      <div class="result"><b id="obPro">0g</b><span>蛋白質 / 天</span></div>
+      <div class="result"><b id="obPer">0</b><span>每餐 kcal / 蛋白</span></div>
+    </div>
+    <div class="card form">
+      <div class="kv"><div>每日熱量<small>可以自己微調</small></div><input class="field numin" type="number" inputmode="numeric" id="obKcalIn" onchange="obRecalcPer()"></div>
+      <div class="kv"><div>每日蛋白質</div><input class="field numin" type="number" inputmode="numeric" id="obProIn" onchange="obRecalcPer()"></div>
+    </div>
+    <div class="callout" style="margin-bottom:12px" id="obNote"></div>
+    <button class="btn" onclick="obFinish()">開始使用</button>
+    <button class="btn ghost sm" style="margin:10px auto 0" onclick="obBack()">回上一步</button>
+  </div>
+</section>
+
 <!-- ================= 計算 ================= -->
 <section class="page on" id="page-calc">
   <div class="topbar"><h2>DailyControl</h2><span class="muted" id="todayLabel"></span></div>
@@ -282,6 +349,7 @@
     <div class="kv"><div>每日蛋白質目標<small>g</small></div><input class="field" type="number" inputmode="numeric" id="setPro" style="width:110px;text-align:center" onchange="saveSettings()"></div>
     <div class="kv"><div>每餐目標（自動）<small>每日目標 ÷ 餐數</small></div><em id="setPerMeal"></em></div>
     <p class="muted" style="margin:8px 0 0">修改後立即生效。過去的紀錄不會被改動，只影響顯示的目標線和顏色判斷。</p>
+    <div class="btnrow"><button class="btn sec sm" style="flex:1" onclick="startOnboard(true)">用身高體重重新計算目標</button></div>
   </div></details>
 
   <details><summary>每餐骨架</summary><div class="body">
@@ -421,7 +489,7 @@ if(cfg&&cfg.apiKey){
       setLog(e){return F.setDoc(F.doc(db,'users',uid(),'logs',String(e.ts)),JSON.parse(JSON.stringify(e)));},
       delLog(ts){return F.deleteDoc(F.doc(db,'users',uid(),'logs',String(ts)));},
       saveRecipes(items){return F.setDoc(F.doc(db,'users',uid(),'meta','recipes'),{items:JSON.parse(JSON.stringify(items))});},
-      saveSettings(st){return F.setDoc(F.doc(db,'users',uid(),'meta','settings'),{meals:st.meals,kcal:st.kcal,pro:st.pro});},
+      saveSettings(st){return F.setDoc(F.doc(db,'users',uid(),'meta','settings'),JSON.parse(JSON.stringify(st)),{merge:true});},
     };
     A.getRedirectResult(auth).catch(()=>{});
     window.dispatchEvent(new Event('fb-ready'));
@@ -565,6 +633,61 @@ function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMo
 function normDate(d){const str=String(d).trim();const m=str.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');const dt=new Date(str);if(!isNaN(dt))return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');return str;}
 function normalizeLog(){log.forEach(l=>{l.date=normDate(l.date);l.k=Number(l.k)||0;l.p=Number(l.p)||0;l.cb=Number(l.cb)||0;l.ts=Number(l.ts);});}
 let toastT; function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2200);}
+
+/* ---------- 模式：login / onboard / app ---------- */
+let mode='login';
+function setMode(m){
+  mode=m; document.body.classList.toggle('gate',m!=='app');
+  if(m==='login'){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='page-login'));}
+  else if(m==='onboard'){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='page-onboard'));}
+  else{const h=(location.hash||'').replace('#','');showTab(['calc','lib','log','help'].includes(h)?h:'calc');}
+  window.scrollTo(0,0);
+}
+function enterLocalMode(){user=null;localMode=true;onAuthChanged(null);}
+
+/* ---------- 初次設定（目標計算） ---------- */
+const OB={meals:2,sex:'',act:0,ex:-1,pace:500};
+function segInit(id,key,cast){const box=document.getElementById(id);box.querySelectorAll('button').forEach(b=>{b.onclick=()=>{box.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');OB[key]=cast?cast(b.dataset.v):b.dataset.v;};});}
+function obInit(pref){
+  document.getElementById('obMeals').innerHTML=[1,2,3,4,5,6].map(n=>`<button data-v="${n}" class="${n===OB.meals?'on':''}">${n} 餐</button>`).join('');
+  segInit('obMeals','meals',Number);segInit('obSex','sex');segInit('obAct','act',Number);segInit('obEx','ex',Number);segInit('obPace','pace',Number);
+  if(pref){ ['Age','H','W','T'].forEach(k=>{const v=pref[k.toLowerCase()==='age'?'age':k==='H'?'height':k==='W'?'weight':'target'];if(v)document.getElementById('ob'+k).value=v;});
+    const setSeg=(id,v)=>{document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.toggle('on',String(b.dataset.v)===String(v)));};
+    if(pref.sex){OB.sex=pref.sex;setSeg('obSex',pref.sex);} if(pref.act){OB.act=pref.act;setSeg('obAct',pref.act);} if(pref.ex!=null){OB.ex=pref.ex;setSeg('obEx',pref.ex);} if(pref.pace){OB.pace=pref.pace;setSeg('obPace',pref.pace);} if(pref.meals){OB.meals=pref.meals;setSeg('obMeals',pref.meals);} }
+  else{ setTimeout(()=>{const b=document.querySelector('#obPace [data-v="500"]');if(b)b.click();},0); }
+  document.getElementById('ob1').style.display='block';document.getElementById('ob2').style.display='none';document.getElementById('stepDot2').classList.remove('on');
+}
+function startOnboard(fromSettings){obInit(fromSettings?SET:null);setMode('onboard');}
+function obCalc(){
+  const age=+document.getElementById('obAge').value,h=+document.getElementById('obH').value,w=+document.getElementById('obW').value,t=+document.getElementById('obT').value||w;
+  const err=document.getElementById('obErr');
+  if(!OB.sex||!age||!h||!w||!OB.act||OB.ex<0){err.textContent='請把每一項都填好。';return;} err.textContent='';
+  // Mifflin-St Jeor 基礎代謝
+  const bmr=10*w+6.25*h-5*age+(OB.sex==='m'?5:-161);
+  const exFactor=[0,0.05,0.12,0.2][OB.ex];
+  const tdee=bmr*(OB.act+exFactor);
+  const goal=t<w-0.5?'lose':(t>w+0.5?'gain':'keep');
+  let kcal=goal==='lose'?tdee-OB.pace:(goal==='gain'?tdee+300:tdee);
+  const floor=OB.sex==='m'?1500:1200; if(kcal<floor)kcal=floor; if(goal==='lose'&&kcal<bmr*0.9)kcal=Math.round(bmr*0.9);
+  kcal=Math.round(kcal/10)*10;
+  // 蛋白質：減重期以目標體重 2.0 g/kg，維持 1.6，增重 1.8；下限 1.2 g/kg 現體重
+  const pro=Math.max(Math.round(t*(goal==='lose'?2.0:goal==='gain'?1.8:1.6)),Math.round(w*1.2));
+  Object.assign(OB,{age,height:h,weight:w,target:t,bmr:Math.round(bmr),tdee:Math.round(tdee),goal});
+  document.getElementById('obKcalIn').value=kcal;document.getElementById('obProIn').value=pro;
+  document.getElementById('obExplain').textContent=`基礎代謝約 ${Math.round(bmr)} kcal，加上活動量每日消耗約 ${Math.round(tdee)} kcal。`+(goal==='lose'?`目標減到 ${t} kg，每日少吃 ${OB.pace} kcal，約每週減 ${(OB.pace*7/7700).toFixed(1)} kg。`:goal==='gain'?`目標增到 ${t} kg，每日多吃 300 kcal。`:'以維持目前體重為目標。');
+  document.getElementById('obNote').innerHTML=goal==='lose'?'<b>提醒</b>：熱量不建議長期低於基礎代謝的九成，蛋白質吃夠才能在減脂時保住肌肉。每 8–10 週可安排一週吃到維持量。':'<b>提醒</b>：蛋白質分散到每一餐吸收效率較好，每餐至少 25–30g。';
+  obRecalcPer();
+  document.getElementById('ob1').style.display='none';document.getElementById('ob2').style.display='block';document.getElementById('stepDot2').classList.add('on');window.scrollTo(0,0);
+}
+function obRecalcPer(){const k=+document.getElementById('obKcalIn').value||0,p=+document.getElementById('obProIn').value||0;document.getElementById('obKcal').textContent=k.toLocaleString();document.getElementById('obPro').textContent=p+'g';document.getElementById('obPer').textContent=Math.round(k/OB.meals)+' / '+Math.round(p/OB.meals)+'g';}
+function obBack(){document.getElementById('ob1').style.display='block';document.getElementById('ob2').style.display='none';document.getElementById('stepDot2').classList.remove('on');}
+function obFinish(){
+  SET.meals=OB.meals;SET.kcal=+document.getElementById('obKcalIn').value||1600;SET.pro=+document.getElementById('obProIn').value||115;
+  Object.assign(SET,{sex:OB.sex,age:OB.age,height:OB.height,weight:OB.weight,target:OB.target,act:OB.act,ex:OB.ex,pace:OB.pace,onboarded:true});
+  try{localStorage.setItem(KEY_SET,JSON.stringify(SET));}catch(e){}
+  if(user) FB.saveSettings(SET).catch(()=>{});
+  loadSettingsUI();applySettings();setMode('app');toast('設定完成，開始紀錄吧');
+}
 
 /* ---------- 分頁 ---------- */
 function showTab(id){
@@ -793,24 +916,33 @@ function setAuthUI(){
   document.getElementById('legacyBox').style.display=(on&&LEGACY_URL)?'block':'none';
 }
 async function authAction(){
-  if(!window.FB||!FB.ready){toast('雲端服務未設定（config.js）');return;}
-  if(user){ if(confirm('登出後這支手機會回到本機模式，雲端紀錄仍保留。要登出嗎？')) await FB.signOut(); return; }
-  try{ await FB.signIn(); }catch(e){ toast('登入失敗：'+(e.code||e.message)); }
+  if(!window.FB||!FB.ready){toast('雲端服務未設定（config.js）');document.getElementById('localModeBtn').style.display='block';return;}
+  if(user){ if(confirm('要登出嗎？雲端紀錄會保留在你的帳號。')){ localMode=false; await FB.signOut(); } return; }
+  document.getElementById('loginStatus').textContent='開啟 Google 登入…';
+  try{ await FB.signIn(); }catch(e){ toast('登入失敗：'+(e.code||e.message)); document.getElementById('loginStatus').textContent='登入失敗：'+(e.code||e.message); }
 }
 /* 登入狀態改變：切換資料來源 */
+let localMode=false;
 function onAuthChanged(u){
   user=u; setAuthUI();
   if(u){
+    localMode=false;
     localLogBackup=load(KEY_LOG,[]);
     log=[]; saved=[]; renderLog(); renderToday();
-    setStatus('已登入，同步中…');
+    setStatus('已登入，同步中…'); document.getElementById('loginStatus').textContent='登入成功，載入中…';
+    let first=true;
+    FB.listenSettings(st=>{
+      if(st){ Object.assign(SET,st); try{localStorage.setItem(KEY_SET,JSON.stringify(SET));}catch(e){} loadSettingsUI(); applySettings(); }
+      if(first){ first=false; if(st&&st.onboarded) setMode('app'); else startOnboard(false); }
+    });
     FB.listenLogs(rows=>{ log=rows; normalizeLog(); renderLog(); renderToday(); setStatus('已同步（'+log.length+' 筆）'); checkMigrate(); });
     FB.listenRecipes(r=>{ saved=r; });
-    FB.listenSettings(st=>{ if(st){ Object.assign(SET,st); try{localStorage.setItem(KEY_SET,JSON.stringify(SET));}catch(e){} loadSettingsUI(); applySettings(); } });
   }else{
     log=load(KEY_LOG,[]); saved=load(KEY_RECIPES,[]);
     renderLog(); renderToday(); setStatus('本機模式（未登入）');
     document.getElementById('migrateBox').style.display='none';
+    if(localMode){ if(SET.onboarded) setMode('app'); else startOnboard(false); }
+    else setMode('login');
   }
 }
 function checkMigrate(){
@@ -846,9 +978,12 @@ async function estimatePost(text){
 /* ---------- 啟動 ---------- */
 renderLibTabs();renderLib();renderDays();loadSettingsUI();applySettings();
 const h=(location.hash||'').replace('#','');if(['calc','lib','log','help'].includes(h))showTab(h);
-setAuthUI(); setStatus(CFG.firebase?'連線中…':'未設定 Firebase（config.js），本機模式');
-window.addEventListener('fb-ready',()=>{FB.onAuth(onAuthChanged);});
-window.addEventListener('fb-error',e=>{setStatus('Firebase 初始化失敗：'+e.detail);});
+setAuthUI(); setMode('login');
+if(CFG.firebase&&CFG.firebase.apiKey){ document.getElementById('loginStatus').textContent='連線中…'; }
+else { document.getElementById('loginStatus').textContent='尚未設定雲端帳號服務（config.js）'; document.getElementById('googleBtn').style.opacity='.4'; document.getElementById('localModeBtn').style.display='block'; }
+setStatus(CFG.firebase?'連線中…':'未設定 Firebase（config.js），本機模式');
+window.addEventListener('fb-ready',()=>{document.getElementById('loginStatus').textContent='';FB.onAuth(onAuthChanged);});
+window.addEventListener('fb-error',e=>{setStatus('Firebase 初始化失敗：'+e.detail);document.getElementById('loginStatus').textContent='雲端連線失敗：'+e.detail;document.getElementById('localModeBtn').style.display='block';});
 window.addEventListener('online',()=>{resolvePending();});
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){navigator.serviceWorker.register('sw.js').catch(()=>{});}
 </script>
