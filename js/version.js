@@ -1,2 +1,2 @@
 // 唯一的版本來源：更新任何檔案後把這個數字加 1，sw.js 會自動跟著換快取。
-const APP_VERSION = '1.0.25';
+const APP_VERSION = '1.0.26';
