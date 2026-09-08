@@ -2,11 +2,12 @@
 importScripts('./js/version.js');
 const VERSION = 'v' + APP_VERSION;
 const CACHE = 'dailycontrol-' + VERSION;
+const Q = '?v=' + APP_VERSION;
 const ASSETS = [
-  './', './index.html', './config.js', './js/version.js', './manifest.webmanifest',
-  './css/app.css',
-  './js/firebase.js', './js/data.js', './js/state.js', './js/onboard.js',
-  './js/calc.js', './js/library.js', './js/log.js', './js/auth.js', './js/app.js',
+  './', './index.html', './js/version.js', './manifest.webmanifest',
+  './config.js' + Q, './css/app.css' + Q,
+  './js/firebase.js' + Q, './js/data.js' + Q, './js/state.js' + Q, './js/onboard.js' + Q,
+  './js/calc.js' + Q, './js/library.js' + Q, './js/log.js' + Q, './js/auth.js' + Q, './js/app.js' + Q,
   './icons/icon-192.png', './icons/icon-512.png'
 ];
 

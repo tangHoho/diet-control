@@ -11,7 +11,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>DailyControl</title>
-<link rel="stylesheet" href="css/app.css">
+<script src="js/version.js"></script>
+<script>document.write('<link rel="stylesheet" href="css/app.css?v='+APP_VERSION+'">');</script>
 </head>
 <body>
 
@@ -330,16 +331,16 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="js/version.js"></script>
-<script src="config.js"></script>
-<script type="module" src="js/firebase.js"></script>
-<script src="js/data.js"></script>
-<script src="js/state.js"></script>
-<script src="js/onboard.js"></script>
-<script src="js/calc.js"></script>
-<script src="js/library.js"></script>
-<script src="js/log.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/app.js"></script>
+<script>
+/* 所有檔案都用 APP_VERSION 當快取參數載入，確保一次更新全部檔案一起換，不會新舊混用 */
+(function(){
+  var v='?v='+APP_VERSION;
+  document.write('<script src="config.js'+v+'"><\/script>');
+  document.write('<script type="module" src="js/firebase.js'+v+'"><\/script>');
+  ['data','state','onboard','calc','library','log','auth','app'].forEach(function(n){
+    document.write('<script src="js/'+n+'.js'+v+'"><\/script>');
+  });
+})();
+</script>
 </body>
 </html>
