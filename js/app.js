@@ -22,17 +22,16 @@ function closeSheet(){document.getElementById('sheetBg').classList.remove('on');
 renderLibTabs();renderLib();renderDays();loadSettingsUI();applySettings();
 const h=(location.hash||'').replace('#','');if(['calc','lib','log','help'].includes(h))showTab(h);
 document.querySelectorAll('.ver').forEach(e=>e.textContent='DailyControl v'+APP_VERSION);
-setAuthUI(); setMode('login');
-/* 啟動時先顯示載入畫面（藏起登入按鈕），等 Firebase 回報登入狀態再決定要顯示登入頁還是直接進入，避免重新整理時閃一下登入頁 */
-const loginBtn=document.getElementById('googleBtn');
-function showLoginButton(){loginBtn.style.display='flex';document.getElementById('loginStatus').textContent='';}
+setAuthUI();
+/* 啟動：先停在只有 logo 的啟動畫面，等 Firebase 回報登入狀態後才決定顯示登入頁或直接進入，重新整理不會閃登入頁 */
 if(CFG.firebase&&CFG.firebase.apiKey){
-  loginBtn.style.display='none'; document.getElementById('loginStatus').textContent='載入中…';
-  const fallback=setTimeout(()=>{showLoginButton();document.getElementById('loginStatus').textContent='連線較慢，可直接登入';},8000);
-  window.addEventListener('fb-ready',()=>{FB.onAuth(u=>{clearTimeout(fallback);if(!u)showLoginButton();onAuthChanged(u);});});
-  window.addEventListener('fb-error',e=>{clearTimeout(fallback);showLoginButton();setStatus('Firebase 初始化失敗：'+e.detail);document.getElementById('loginStatus').textContent='雲端連線失敗：'+e.detail;document.getElementById('localModeBtn').style.display='block';});
+  setMode('splash');
+  const fallback=setTimeout(()=>{setMode('login');document.getElementById('loginStatus').textContent='連線較慢，可直接登入';},8000);
+  window.addEventListener('fb-ready',()=>{FB.onAuth(u=>{clearTimeout(fallback);onAuthChanged(u);});});
+  window.addEventListener('fb-error',e=>{clearTimeout(fallback);setMode('login');setStatus('Firebase 初始化失敗：'+e.detail);document.getElementById('loginStatus').textContent='雲端連線失敗：'+e.detail;document.getElementById('localModeBtn').style.display='block';});
 }else{
-  document.getElementById('loginStatus').textContent='尚未設定雲端帳號服務（config.js）'; loginBtn.style.opacity='.4'; document.getElementById('localModeBtn').style.display='block';
+  setMode('login');
+  document.getElementById('loginStatus').textContent='尚未設定雲端帳號服務（config.js）'; document.getElementById('googleBtn').style.opacity='.4'; document.getElementById('localModeBtn').style.display='block';
   setStatus('未設定 Firebase（config.js），本機模式');
 }
 window.addEventListener('online',()=>{resolvePending();});

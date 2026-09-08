@@ -5,7 +5,8 @@
 let mode='login';
 function setMode(m){
   mode=m; document.body.classList.toggle('gate',m!=='app');
-  if(m==='login'){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='page-login'));}
+  if(m==='splash'){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='page-splash'));}
+  else if(m==='login'){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='page-login'));}
   else if(m==='onboard'){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='page-onboard'));}
   else{const h=(location.hash||'').replace('#','');showTab(['calc','lib','log','help'].includes(h)?h:'calc');}
   window.scrollTo(0,0);
