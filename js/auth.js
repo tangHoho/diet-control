@@ -29,10 +29,13 @@ function onAuthChanged(u){
     log=[]; saved=[]; renderLog(); renderToday();
     setStatus('已登入，同步中…'); document.getElementById('loginStatus').textContent='登入成功，載入中…';
     if(manualLogin){ manualLogin=false; toast('以 '+(u.displayName||u.email||'已登入帳號')+' 登入'); }
-    let first=true;
-    FB.listenSettings(st=>{
+    let decided=false;
+    const decide=st=>{ if(decided) return; decided=true; clearTimeout(waitTimer); if(st&&st.onboarded) setMode('app'); else startOnboard(false); };
+    // 快取說「沒有設定」不算數，最多等伺服器 8 秒；有設定（不論來源）就直接決定
+    const waitTimer=setTimeout(()=>decide(null),8000);
+    FB.listenSettings((st,fromCache)=>{
       if(st){ Object.assign(SET,st); try{localStorage.setItem(KEY_SET,JSON.stringify(SET));}catch(e){} loadSettingsUI(); applySettings(); }
-      if(first){ first=false; if(st&&st.onboarded) setMode('app'); else startOnboard(false); }
+      if(st||!fromCache) decide(st);
     });
     FB.listenLogs(rows=>{ log=rows; normalizeLog(); renderLog(); renderToday(); setStatus('已同步（'+log.length+' 筆）'); checkMigrate(); });
     FB.listenRecipes(r=>{ saved=r; });

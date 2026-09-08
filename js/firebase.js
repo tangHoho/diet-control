@@ -27,7 +27,7 @@ if(cfg&&cfg.apiKey){
       listenFoods(cb){unsub.foods=F.onSnapshot(F.doc(db,'users',uid(),'meta','foods'),d=>cb((d.exists()&&d.data().items)||[]));},
       saveFoods(items){return F.setDoc(F.doc(db,'users',uid(),'meta','foods'),{items:JSON.parse(JSON.stringify(items))});},
       listenRecipes(cb){unsub.rec=F.onSnapshot(F.doc(db,'users',uid(),'meta','recipes'),d=>cb((d.exists()&&d.data().items)||[]));},
-      listenSettings(cb){unsub.set=F.onSnapshot(F.doc(db,'users',uid(),'meta','settings'),d=>cb(d.exists()?d.data():null));},
+      listenSettings(cb){unsub.set=F.onSnapshot(F.doc(db,'users',uid(),'meta','settings'),{includeMetadataChanges:true},d=>cb(d.exists()?d.data():null,d.metadata.fromCache));},
       setLog(e){return F.setDoc(F.doc(db,'users',uid(),'logs',String(e.ts)),JSON.parse(JSON.stringify(e)));},
       delLog(ts){return F.deleteDoc(F.doc(db,'users',uid(),'logs',String(ts)));},
       saveRecipes(items){return F.setDoc(F.doc(db,'users',uid(),'meta','recipes'),{items:JSON.parse(JSON.stringify(items))});},
