@@ -1,7 +1,7 @@
 {
-  "name": "兩餐菜單與食材庫",
-  "short_name": "兩餐菜單",
-  "description": "一天兩餐自煮菜單、食材庫組合、飲控紀錄",
+  "name": "DailyControl",
+  "short_name": "DailyControl",
+  "description": "一天兩餐飲控：食材庫組合、紀錄、趨勢",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -10,9 +10,27 @@
   "theme_color": "#000000",
   "lang": "zh-Hant",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "icons/icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

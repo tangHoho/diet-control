@@ -1,13 +1,14 @@
-# 兩餐菜單與食材庫（PWA）
+# DailyControl（PWA）
 
-1. 在 GitHub 建一個 repo（例如 meal-app），把這個資料夾的檔案全部上傳到根目錄。
-2. repo → Settings → Pages → Source 選「Deploy from a branch」，Branch 選 main / root，儲存。
-3. 幾分鐘後網址是 https://<你的帳號>.github.io/meal-app/
-4. 手機 Chrome 開這個網址 → 右上選單「加到主畫面」/「安裝應用程式」。
-5. 之後更新 index.html 時，把 sw.js 裡的 VERSION 改一下（v1 → v2），手機重開 App 就會拿到新版。
+一天兩餐飲控 App：計算 / 食材庫 / 飲控紀錄 / 幫助。
 
-雲端同步網址和紀錄存在 App 自己的儲存空間，跟原本 file:// 開的版本不共用，第一次要重新貼一次 Apps Script 網址。
+## 部署
+1. 把這個資料夾的檔案全部放到 repo 根目錄（index.html 要在最外層）。
+2. Settings → Pages → Deploy from a branch → main / root。
+3. 手機 Chrome 開網址 → 選單「加到主畫面」或「安裝應用程式」。
 
-## 雲端網址設定
-`config.js` 裡填 Apps Script 的 /exec 網址，只需填一次。
-之後從 Claude 拿到新的 index.html 直接覆蓋即可，config.js 不會被動到。
+## 只需設定一次
+`config.js` 填 Apps Script 的 /exec 網址。之後更新 index.html 直接覆蓋，config.js 不會被動到。
+
+## 更新
+覆蓋 index.html 後，把 sw.js 的 VERSION 改一下（v6 → v7），手機重開 App 就會拿到新版。
