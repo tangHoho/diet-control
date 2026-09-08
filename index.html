@@ -503,6 +503,7 @@ if(cfg&&cfg.apiKey){
     const auth=A.getAuth(app);
     const db=F.initializeFirestore(app,{localCache:F.persistentLocalCache({tabManager:F.persistentMultipleTabManager()})});
     const provider=new A.GoogleAuthProvider();
+    provider.setCustomParameters({prompt:'select_account'});   // 每次按登入都跳出帳號選擇
     const uid=()=>auth.currentUser&&auth.currentUser.uid;
     const col=name=>F.collection(db,'users',uid(),name);
     const unsub={};
@@ -688,7 +689,7 @@ function obInit(pref){
 }
 let obCur=1;
 function obGo(n){obCur=n;for(let i=1;i<=4;i++){document.getElementById('obs'+i).style.display=i===n?'block':'none';document.getElementById('dot'+i).classList.toggle('on',i<=n);}
-  document.getElementById('obPrev').style.visibility=n===1?'hidden':'visible';document.getElementById('obNext').textContent=n===4?'開始使用':(n===3?'計算目標':'下一步');document.getElementById('obErr').textContent='';window.scrollTo(0,0);}
+  document.getElementById('obPrev').style.display=n===1?'none':'block';document.getElementById('obNext').textContent=n===4?'開始使用':(n===3?'計算目標':'下一步');document.getElementById('obErr').textContent='';window.scrollTo(0,0);}
 function obStep(dir){
   if(dir<0){obGo(Math.max(1,obCur-1));return;}
   const err=document.getElementById('obErr');
@@ -965,7 +966,7 @@ function onAuthChanged(u){
     localMode=false;
     localLogBackup=load(KEY_LOG,[]);
     log=[]; saved=[]; renderLog(); renderToday();
-    setStatus('已登入，同步中…'); document.getElementById('loginStatus').textContent='登入成功，載入中…';
+    setStatus('已登入，同步中…'); document.getElementById('loginStatus').textContent='登入成功，載入中…'; toast('以 '+(u.displayName||u.email||'已登入帳號')+' 登入');
     let first=true;
     FB.listenSettings(st=>{
       if(st){ Object.assign(SET,st); try{localStorage.setItem(KEY_SET,JSON.stringify(SET));}catch(e){} loadSettingsUI(); applySettings(); }
