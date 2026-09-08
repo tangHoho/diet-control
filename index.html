@@ -40,7 +40,8 @@
 
   /* 登入 / 引導 */
   body.gate .tabbar{display:none}
-  .gate-page{min-height:100vh;display:flex;flex-direction:column;justify-content:center;max-width:420px;margin:0 auto;padding:40px 24px calc(40px + env(safe-area-inset-bottom))}
+  body.gate{overflow:hidden;height:100vh;height:100dvh}
+  .gate-page{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;max-width:420px;margin:0 auto;padding:40px 24px calc(40px + env(safe-area-inset-bottom))}
   .logo{width:96px;height:96px;border-radius:24px;background:#000;border:2px solid var(--orange);display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
   .logo svg{width:64px;height:64px}
   .gate-title{font-size:30px;font-weight:800;color:#fff;text-align:center;margin:0}
@@ -50,6 +51,13 @@
   .steps{display:flex;gap:6px;margin:0 0 16px}
   .steps i{flex:1;height:4px;border-radius:4px;background:var(--line)} .steps i.on{background:var(--orange)}
   .form .kv{align-items:center}
+  .ob{justify-content:flex-start;height:100vh;height:100dvh;overflow:hidden;padding:calc(20px + env(safe-area-inset-top)) 20px calc(16px + env(safe-area-inset-bottom))}
+  .ob h2{margin-bottom:4px}
+  .ob p.muted{margin:0 0 12px}
+  .obstep{flex:1;min-height:0;overflow:auto}
+  .obfoot{flex:none;padding-top:8px}
+  .ob .card{margin-bottom:0}
+  .ob .kv{padding:10px 0}
   .seg{display:flex;gap:6px;flex-wrap:wrap}
   .seg button{padding:8px 12px;border-radius:10px;background:var(--panel2);font-size:14px}
   .seg button.on{background:var(--orange);color:#000;font-weight:700}
@@ -195,40 +203,60 @@
 </section>
 
 <!-- ================= 初次設定 ================= -->
-<section class="page gate-page" id="page-onboard" style="justify-content:flex-start;padding-top:calc(24px + env(safe-area-inset-top))">
-  <div class="steps"><i class="on"></i><i id="stepDot2"></i></div>
-  <div id="ob1">
-    <h2 style="margin-bottom:4px">先設定你的目標</h2>
-    <p class="muted" style="margin:0 0 14px">用來計算每日熱量和每餐蛋白質，之後在「幫助 → 餐次與目標設定」隨時可改。</p>
+<section class="page gate-page ob" id="page-onboard">
+  <div class="steps"><i class="on" id="dot1"></i><i id="dot2"></i><i id="dot3"></i><i id="dot4"></i></div>
+
+  <div class="obstep" id="obs1">
+    <h2>先設定你的目標</h2>
+    <p class="muted">用來算每日熱量和每餐蛋白質，之後隨時可改。</p>
     <div class="card form">
       <div class="kv"><div>一天吃幾餐</div><div class="seg" id="obMeals"></div></div>
       <div class="kv"><div>性別<small>影響基礎代謝公式</small></div><div class="seg" id="obSex"><button data-v="m">男</button><button data-v="f">女</button></div></div>
       <div class="kv"><div>年齡</div><input class="field numin" type="number" inputmode="numeric" id="obAge" placeholder="歲"></div>
+    </div>
+  </div>
+
+  <div class="obstep" id="obs2" style="display:none">
+    <h2>身高與體重</h2>
+    <p class="muted">目標體重不填就以維持現在體重計算。</p>
+    <div class="card form">
       <div class="kv"><div>身高</div><input class="field numin" type="number" inputmode="decimal" id="obH" placeholder="cm"></div>
       <div class="kv"><div>目前體重</div><input class="field numin" type="number" inputmode="decimal" id="obW" placeholder="kg"></div>
       <div class="kv"><div>目標體重</div><input class="field numin" type="number" inputmode="decimal" id="obT" placeholder="kg"></div>
-      <div class="kv"><div>平常活動量<small>不含刻意運動的日常</small></div><div class="seg" id="obAct"><button data-v="1.2">久坐</button><button data-v="1.375">偶爾動</button><button data-v="1.55">常走動</button><button data-v="1.725">體力活</button></div></div>
-      <div class="kv"><div>每週運動<small>重訓、跑步等</small></div><div class="seg" id="obEx"><button data-v="0">0 次</button><button data-v="1">1–2 次</button><button data-v="2">3–4 次</button><button data-v="3">5 次以上</button></div></div>
-      <div class="kv"><div>減重速度<small>越快越難維持肌肉</small></div><div class="seg" id="obPace"><button data-v="300">溫和</button><button data-v="500">標準</button><button data-v="700">積極</button></div></div>
     </div>
-    <div class="muted" id="obErr" style="min-height:18px;margin:4px 0"></div>
-    <button class="btn" onclick="obCalc()">計算目標</button>
   </div>
-  <div id="ob2" style="display:none">
-    <h2 style="margin-bottom:4px">你的每日目標</h2>
-    <p class="muted" style="margin:0 0 14px" id="obExplain"></p>
-    <div class="metrics" style="margin-bottom:12px">
-      <div class="result"><b id="obKcal">0</b><span>kcal / 天</span></div>
-      <div class="result"><b id="obPro">0g</b><span>蛋白質 / 天</span></div>
-      <div class="result"><b id="obPer">0</b><span>每餐 kcal / 蛋白</span></div>
-    </div>
+
+  <div class="obstep" id="obs3" style="display:none">
+    <h2>活動量</h2>
+    <p class="muted">日常活動和刻意運動分開算。</p>
     <div class="card form">
-      <div class="kv"><div>每日熱量<small>可以自己微調</small></div><input class="field numin" type="number" inputmode="numeric" id="obKcalIn" onchange="obRecalcPer()"></div>
+      <div class="kv" style="flex-direction:column;align-items:flex-start;gap:6px"><div>平常活動量<small>不含刻意運動的日常</small></div><div class="seg" id="obAct"><button data-v="1.2">久坐</button><button data-v="1.375">偶爾動</button><button data-v="1.55">常走動</button><button data-v="1.725">體力活</button></div></div>
+      <div class="kv" style="flex-direction:column;align-items:flex-start;gap:6px"><div>每週運動<small>重訓、跑步等</small></div><div class="seg" id="obEx"><button data-v="0">0 次</button><button data-v="1">1–2 次</button><button data-v="2">3–4 次</button><button data-v="3">5 次以上</button></div></div>
+      <div class="kv" style="flex-direction:column;align-items:flex-start;gap:6px"><div>減重速度<small>越快越難維持肌肉</small></div><div class="seg" id="obPace"><button data-v="300">溫和</button><button data-v="500">標準</button><button data-v="700">積極</button></div></div>
+    </div>
+  </div>
+
+  <div class="obstep" id="obs4" style="display:none">
+    <h2>你的每日目標</h2>
+    <p class="muted" id="obExplain"></p>
+    <div class="metrics" style="margin-bottom:10px">
+      <div class="result"><b id="obKcal">0</b><span>kcal / 天</span></div>
+      <div class="result"><b id="obPro">0g</b><span>蛋白 / 天</span></div>
+      <div class="result"><b id="obPer">0</b><span>每餐</span></div>
+    </div>
+    <div class="card form" style="margin-bottom:10px">
+      <div class="kv"><div>每日熱量<small>可微調</small></div><input class="field numin" type="number" inputmode="numeric" id="obKcalIn" onchange="obRecalcPer()"></div>
       <div class="kv"><div>每日蛋白質</div><input class="field numin" type="number" inputmode="numeric" id="obProIn" onchange="obRecalcPer()"></div>
     </div>
-    <div class="callout" style="margin-bottom:12px" id="obNote"></div>
-    <button class="btn" onclick="obFinish()">開始使用</button>
-    <button class="btn ghost sm" style="margin:10px auto 0" onclick="obBack()">回上一步</button>
+    <div class="callout" id="obNote" style="margin-top:0"></div>
+  </div>
+
+  <div class="obfoot">
+    <div class="muted" id="obErr" style="min-height:18px;text-align:center"></div>
+    <div class="btnrow" style="margin-top:6px">
+      <button class="btn ghost" id="obPrev" onclick="obStep(-1)" style="flex:0 0 96px">上一步</button>
+      <button class="btn" id="obNext" onclick="obStep(1)">下一步</button>
+    </div>
   </div>
 </section>
 
@@ -655,13 +683,22 @@ function obInit(pref){
     const setSeg=(id,v)=>{document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.toggle('on',String(b.dataset.v)===String(v)));};
     if(pref.sex){OB.sex=pref.sex;setSeg('obSex',pref.sex);} if(pref.act){OB.act=pref.act;setSeg('obAct',pref.act);} if(pref.ex!=null){OB.ex=pref.ex;setSeg('obEx',pref.ex);} if(pref.pace){OB.pace=pref.pace;setSeg('obPace',pref.pace);} if(pref.meals){OB.meals=pref.meals;setSeg('obMeals',pref.meals);} }
   else{ setTimeout(()=>{const b=document.querySelector('#obPace [data-v="500"]');if(b)b.click();},0); }
-  document.getElementById('ob1').style.display='block';document.getElementById('ob2').style.display='none';document.getElementById('stepDot2').classList.remove('on');
+  obGo(1);
+}
+let obCur=1;
+function obGo(n){obCur=n;for(let i=1;i<=4;i++){document.getElementById('obs'+i).style.display=i===n?'block':'none';document.getElementById('dot'+i).classList.toggle('on',i<=n);}
+  document.getElementById('obPrev').style.visibility=n===1?'hidden':'visible';document.getElementById('obNext').textContent=n===4?'開始使用':(n===3?'計算目標':'下一步');document.getElementById('obErr').textContent='';window.scrollTo(0,0);}
+function obStep(dir){
+  if(dir<0){obGo(Math.max(1,obCur-1));return;}
+  const err=document.getElementById('obErr');
+  if(obCur===1){const age=+document.getElementById('obAge').value;if(!OB.sex||!age){err.textContent='請選擇性別並填年齡。';return;}obGo(2);}
+  else if(obCur===2){const h=+document.getElementById('obH').value,w=+document.getElementById('obW').value;if(!h||!w){err.textContent='請填身高和目前體重。';return;}obGo(3);}
+  else if(obCur===3){if(!OB.act||OB.ex<0){err.textContent='請選擇活動量和運動次數。';return;}obCalc();obGo(4);}
+  else obFinish();
 }
 function startOnboard(fromSettings){obInit(fromSettings?SET:null);setMode('onboard');}
 function obCalc(){
   const age=+document.getElementById('obAge').value,h=+document.getElementById('obH').value,w=+document.getElementById('obW').value,t=+document.getElementById('obT').value||w;
-  const err=document.getElementById('obErr');
-  if(!OB.sex||!age||!h||!w||!OB.act||OB.ex<0){err.textContent='請把每一項都填好。';return;} err.textContent='';
   // Mifflin-St Jeor 基礎代謝
   const bmr=10*w+6.25*h-5*age+(OB.sex==='m'?5:-161);
   const exFactor=[0,0.05,0.12,0.2][OB.ex];
@@ -677,10 +714,8 @@ function obCalc(){
   document.getElementById('obExplain').textContent=`基礎代謝約 ${Math.round(bmr)} kcal，加上活動量每日消耗約 ${Math.round(tdee)} kcal。`+(goal==='lose'?`目標減到 ${t} kg，每日少吃 ${OB.pace} kcal，約每週減 ${(OB.pace*7/7700).toFixed(1)} kg。`:goal==='gain'?`目標增到 ${t} kg，每日多吃 300 kcal。`:'以維持目前體重為目標。');
   document.getElementById('obNote').innerHTML=goal==='lose'?'<b>提醒</b>：熱量不建議長期低於基礎代謝的九成，蛋白質吃夠才能在減脂時保住肌肉。每 8–10 週可安排一週吃到維持量。':'<b>提醒</b>：蛋白質分散到每一餐吸收效率較好，每餐至少 25–30g。';
   obRecalcPer();
-  document.getElementById('ob1').style.display='none';document.getElementById('ob2').style.display='block';document.getElementById('stepDot2').classList.add('on');window.scrollTo(0,0);
 }
 function obRecalcPer(){const k=+document.getElementById('obKcalIn').value||0,p=+document.getElementById('obProIn').value||0;document.getElementById('obKcal').textContent=k.toLocaleString();document.getElementById('obPro').textContent=p+'g';document.getElementById('obPer').textContent=Math.round(k/OB.meals)+' / '+Math.round(p/OB.meals)+'g';}
-function obBack(){document.getElementById('ob1').style.display='block';document.getElementById('ob2').style.display='none';document.getElementById('stepDot2').classList.remove('on');}
 function obFinish(){
   SET.meals=OB.meals;SET.kcal=+document.getElementById('obKcalIn').value||1600;SET.pro=+document.getElementById('obProIn').value||115;
   Object.assign(SET,{sex:OB.sex,age:OB.age,height:OB.height,weight:OB.weight,target:OB.target,act:OB.act,ex:OB.ex,pace:OB.pace,onboarded:true});
