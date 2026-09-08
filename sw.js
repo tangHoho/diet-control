@@ -1,11 +1,12 @@
-// 離線快取。每次更新任何檔案，把 VERSION 加 1，手機重開就會拿到新版。
-const VERSION = 'v21';
+// 離線快取。版本號統一在 js/version.js 管理。
+importScripts('./js/version.js');
+const VERSION = 'v' + APP_VERSION;
 const CACHE = 'dailycontrol-' + VERSION;
 const ASSETS = [
-  './', './index.html', './config.js', './manifest.webmanifest?v=7',
-  './css/app.css?v=21',
-  './js/firebase.js?v=21', './js/data.js?v=21', './js/state.js?v=21', './js/onboard.js?v=21',
-  './js/calc.js?v=21', './js/library.js?v=21', './js/log.js?v=21', './js/auth.js?v=21', './js/app.js?v=21',
+  './', './index.html', './config.js', './js/version.js', './manifest.webmanifest',
+  './css/app.css',
+  './js/firebase.js', './js/data.js', './js/state.js', './js/onboard.js',
+  './js/calc.js', './js/library.js', './js/log.js', './js/auth.js', './js/app.js',
   './icons/icon-192.png', './icons/icon-512.png'
 ];
 

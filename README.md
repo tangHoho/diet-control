@@ -16,7 +16,8 @@ js/library.js       食材庫九宮格、五天菜單、自訂食材新增/刪�
 js/log.js           飲控紀錄、趨勢圖、明細、備份
 js/auth.js          帳號 UI、匯入本機/舊試算表、AI 估算呼叫
 js/app.js           分頁切換與啟動
-sw.js               離線快取（更新時 VERSION 加 1）
+js/version.js       版本號（唯一來源，更新時加 1）
+sw.js               離線快取
 ```
 
 ## 一次性設定：Firebase
@@ -31,4 +32,4 @@ sw.js               離線快取（更新時 VERSION 加 1）
 - `config.js` 的 `estimateUrl` 填 /exec 網址；`legacySheetUrl` 填同一個可把舊紀錄匯入帳號。
 
 ## 更新
-覆蓋有變動的檔案，把 `sw.js` 的 VERSION 加 1，並同步更新 index.html 與 sw.js 裡的 `?v=` 版本號。config.js 不覆蓋。
+覆蓋有變動的檔案，然後把 `js/version.js` 的 APP_VERSION 加 1（sw.js 會自動跟著換快取，登入頁和設定頁也會顯示這個版本）。config.js 不覆蓋。

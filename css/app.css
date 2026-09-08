@@ -177,3 +177,4 @@
   /* Toast */
   .toast{position:fixed;left:50%;bottom:calc(var(--tab-h) + 16px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:#fff;color:#000;padding:10px 16px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;transition:.25s;z-index:70;pointer-events:none;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis}
   .toast.on{opacity:1;transform:translateX(-50%)}
+  .ver{font-size:11px;color:#666;text-align:center;margin-top:16px}

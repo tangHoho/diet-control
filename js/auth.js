@@ -41,7 +41,7 @@ function onAuthChanged(u){
     renderLog(); renderToday(); setStatus('本機模式（未登入）');
     document.getElementById('migrateBox').style.display='none';
     if(localMode){ if(SET.onboarded) setMode('app'); else startOnboard(false); }
-    else setMode('login');
+    else { setMode('login'); const b=document.getElementById('googleBtn'); if(b) b.style.display='flex'; }
   }
 }
 function checkMigrate(){
