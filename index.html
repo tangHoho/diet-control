@@ -355,14 +355,7 @@
     <div id="logList"></div>
   </div>
 
-  <details style="margin-top:12px"><summary>備份與匯入</summary><div class="body">
-    <p class="muted" style="margin:0 0 8px">紀錄存在本機並同步到 Google 試算表。換裝置前可先匯出備份。</p>
-    <div class="btnrow" style="margin-top:0">
-      <button class="btn sec sm" style="flex:1" onclick="exportLog()">匯出備份</button>
-      <button class="btn sec sm" style="flex:1" onclick="importLog()">匯入備份</button>
-      <button class="btn sec sm" style="flex:1" onclick="copyLogText()">複製摘要</button>
-    </div>
-  </div></details>
+  <div class="btnrow" style="margin-top:12px"><button class="btn sec sm" style="flex:1" onclick="copyLogText()">複製文字摘要</button></div>
 </section>
 
 <!-- ================= 幫助 ================= -->
@@ -451,6 +444,10 @@
     </div>
     <div id="legacyBox" style="display:none;margin-top:10px"><button class="btn sm ghost" onclick="importLegacySheet()">從舊的 Google 試算表匯入</button></div>
     <div class="callout" style="margin-top:10px"><b>狀態</b>：<span id="cloudStatus2"></span></div>
+    <details style="margin-top:10px;background:var(--panel2)"><summary style="font-size:14px;padding:10px 12px">離線備份（進階）</summary><div class="body" style="padding:0 12px 12px">
+      <p class="muted" style="margin:0 0 8px">「匯出」會把全部紀錄和食譜複製成一段文字，可貼到備忘錄保存；「匯入」貼回同一段文字即可還原，重複的會自動略過。已登入的話資料本來就在帳號裡，平常用不到。</p>
+      <div class="btnrow" style="margin-top:0"><button class="btn sec sm" style="flex:1" onclick="exportLog()">匯出備份</button><button class="btn sec sm" style="flex:1" onclick="importLog()">匯入備份</button></div>
+    </div></details>
   </div></details>
 </section>
 
