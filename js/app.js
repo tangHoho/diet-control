@@ -5,7 +5,7 @@
 function showTab(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='page-'+id));
   document.querySelectorAll('.tabbar button').forEach(b=>b.classList.toggle('on',b.dataset.tab===id));
-  window.scrollTo(0,0); try{history.replaceState(null,'','#'+id);}catch(e){}
+  const m=document.querySelector('.pages'); if(m) m.scrollTop=0; try{history.replaceState(null,'','#'+id);}catch(e){}
 }
 function openSheet(id){
   document.getElementById('sheetBg').classList.add('on');
