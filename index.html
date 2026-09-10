@@ -149,9 +149,9 @@
   <div class="chips wrap" id="libTabs" style="margin-top:10px"></div>
   <div class="grid" id="libList"></div>
 
-  <h3 style="margin:16px 0 8px">五天輪替菜單</h3>
-  <p class="muted" style="margin:0 0 8px">每一餐都可以載入到「計算」再換掉不想吃的食材。</p>
-  <div id="daysList"></div>
+  <h3 style="margin:16px 0 8px">參考備案菜單</h3>
+  <p class="muted" style="margin:0 0 8px">不知道吃什麼時可以直接套用，載入到「計算」後再換掉不想吃的食材。</p>
+  <div class="grid" id="daysList"></div>
 </section>
 
 <!-- ================= 飲控紀錄 ================= -->
@@ -259,6 +259,12 @@
   <input class="field" id="extraText" placeholder="麵包 1 片、拿鐵中杯…">
   <div class="muted" id="extraStatus" style="margin-top:6px;min-height:18px"></div>
   <div class="btnrow"><button class="btn" onclick="addExtra()">估算並加入</button></div>
+</div>
+<div class="sheet" id="sheet-plan">
+  <h3 id="planTitle"></h3>
+  <div class="muted" id="planSub" style="margin:-6px 0 8px"></div>
+  <div class="list" id="planItems"></div>
+  <div class="btnrow"><button class="btn" id="planLoad">載入到計算</button></div>
 </div>
 <div class="sheet" id="sheet-confirm">
   <h3 id="cfTitle">確認</h3>

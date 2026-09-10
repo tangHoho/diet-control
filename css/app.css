@@ -105,6 +105,9 @@
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   .tile{background:var(--panel);border-radius:12px;padding:12px 10px 10px;text-align:left;display:flex;flex-direction:column;gap:3px;min-height:112px;position:relative;border:1px solid transparent}
   .tile.custom{min-height:136px;padding-top:36px}
+  .tile.plan{min-height:104px;padding-top:12px}
+  .tile.plan .pn{font-size:11px;color:var(--orange);font-weight:700;letter-spacing:.3px}
+  .tile.plan .tn{padding-right:0;font-size:13px}
   .tile:active{border-color:var(--orange)}
   .tile .tn{font-size:14px;color:#fff;font-weight:600;line-height:1.25;word-break:keep-all;padding-right:26px}
   .tile .tn br+*{font-weight:400;color:var(--muted);font-size:12px}

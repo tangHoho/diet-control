@@ -25,11 +25,22 @@ function renderLib(){
   document.getElementById('libCount').textContent=list.length+' 項';
   document.getElementById('libList').innerHTML=list.map(f=>{const n=nut(f,f.d);return `<button class="tile ${f.custom?'custom':''}" onclick='addFood(${JSON.stringify(f.id)},true)' title="${f.note||''}"><span class="plus">＋</span>${f.custom?`<span class="tdel" title="編輯" onclick="event.stopPropagation();editUserFood('${f.id}')">✎</span><span class="tdel trm" title="刪除" onclick="event.stopPropagation();delUserFood('${f.id}')">×</span>`:''}<span class="tn">${dnTile(f.n)}</span><span class="ta">${fmtAmt(f,f.d)}</span><span class="tk">${Math.round(n.k)} <small style="font-size:10px;font-weight:400">kcal</small></span><span class="tp">蛋白 ${n.p.toFixed(0)}g・碳水 ${n.cb.toFixed(0)}g</span></button>`;}).join('')||'<div class="empty" style="grid-column:1/-1">找不到</div>';
 }
+/* 參考備案：把每一餐攤平成獨立的備案，標題用前兩樣主食材 */
+function planList(){const out=[];DAYS.forEach((d,di)=>d.meals.forEach((m,mi)=>out.push({di,mi,items:m,title:(d.titles&&d.titles[mi])||m.slice(0,2).map(([n])=>dn(n)).join(' × ')})));return out;}
 function renderDays(){
-  document.getElementById('daysList').innerHTML=DAYS.map((d,di)=>`<details><summary><span>第 ${di+1} 天・${d.t}</span><span class="muted" style="font-weight:400;font-size:12px;margin-right:8px">${d.tag}</span></summary><div class="body">${d.meals.map((m,mi)=>{const items=m.map(([n,a])=>({id:byName(n).id,amt:a}));const t=totals(items);
-    return `<div class="item"><div class="info"><div class="name"><span class="tag">第${mi?'二':'一'}餐</span>${m.map(([n,a])=>dn(n)).join('、')}</div><div class="sub">${Math.round(t.k)} kcal・蛋白 ${t.p.toFixed(0)}g・碳水 ${t.cb.toFixed(0)}g</div></div><button class="btn sm sec" onclick="loadDay(${di},${mi})">載入</button></div>`;}).join('')}</div></details>`).join('');
+  document.getElementById('daysList').innerHTML=planList().map((p,i)=>{
+    const items=p.items.map(([n,a])=>({id:byName(n).id,amt:a}));const t=totals(items);
+    return `<button class="tile plan" onclick="openPlanSheet(${i})"><span class="tn">${p.title.replace(' × ','<br>× ')}</span><span class="tk">${Math.round(t.k)} <small style="font-size:10px;font-weight:400">kcal</small></span><span class="tp">蛋白 ${t.p.toFixed(0)}g・碳水 ${t.cb.toFixed(0)}g</span></button>`;}).join('');
 }
-function loadDay(di,mi){meal=DAYS[di].meals[mi].map(([n,a])=>({id:byName(n).id,amt:a}));setMealName(`第${di+1}天 第${mi?'二':'一'}餐`);renderMeal();showTab('calc');toast('已載入到計算');}
+function openPlanSheet(i){
+  const p=planList()[i]; const items=p.items.map(([n,a])=>({id:byName(n).id,amt:a}));const t=totals(items);
+  document.getElementById('planTitle').textContent=p.title;
+  document.getElementById('planSub').textContent=`${Math.round(t.k)} kcal・蛋白 ${t.p.toFixed(0)}g・碳水 ${t.cb.toFixed(0)}g`;
+  document.getElementById('planItems').innerHTML=p.items.map(([n,a])=>{const f=byName(n);const nn=nut(f,a);return `<div class="item" style="padding:8px 0"><div class="info"><div class="name" style="font-size:15px">${dn(n)}</div></div><div class="muted" style="font-size:12px;white-space:nowrap">${fmtAmt(f,a)}・${Math.round(nn.k)} kcal</div></div>`;}).join('');
+  document.getElementById('planLoad').onclick=()=>{closeSheet();loadDay(p.di,p.mi);};
+  openSheet('plan');
+}
+function loadDay(di,mi){meal=DAYS[di].meals[mi].map(([n,a])=>({id:byName(n).id,amt:a}));setMealName(planList().find(p=>p.di===di&&p.mi===mi).title);renderMeal();showTab('calc');toast('已載入到計算');}
 
 /* ---------- 自訂食材 ---------- */
 function fillCatSelect(selected){
