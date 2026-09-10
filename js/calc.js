@@ -91,12 +91,12 @@ async function addExtra(){
   const parts=txt.split(/[、,，;；\n]+/).map(x=>x.trim()).filter(Boolean);
   const mk=(name,vals,pending)=>({cid:'c'+Date.now()+Math.random().toString(36).slice(2,6),n:name,u:'份',amt:1,k:vals?+vals.kcal||0:0,p:vals?+vals.protein||0:0,cb:vals?+vals.carb||0:0,pending,src:name});
   if(ESTIMATE_URL && user){
-    st.textContent='估算中…';
-    try{const d=await estimatePost(txt);
+    let sec=0; st.textContent='估算中…'; const tick=setInterval(()=>{sec++;st.textContent='估算中… '+sec+' 秒'+(sec>5?'（AI 服務忙碌，稍等）':'');},1000);
+    try{const d=await estimatePost(txt); clearInterval(tick);
       if(!d.ok||!Array.isArray(d.items)) throw new Error(d.error||'估算失敗');
       d.items.forEach(x=>meal.push(mk(x.name,x,false)));
       document.getElementById('extraText').value='';st.textContent='';renderMeal();closeSheet();toast('已估算 '+d.items.length+' 項，數字可直接修改');return;
-    }catch(e){st.textContent='估算失敗（'+e.message+'），先留空，同步時再補算。';}
+    }catch(e){clearInterval(tick);st.textContent='估算失敗（'+e.message+'），先留空，同步時再補算。';}
   }else st.textContent=user?'未設定估算服務，已加入，可手動填數字。':'登入後才能自動估算；已加入，可手動填數字。';
   parts.forEach(pn=>meal.push(mk(pn,null,true)));
   document.getElementById('extraText').value='';renderMeal();setTimeout(closeSheet,900);

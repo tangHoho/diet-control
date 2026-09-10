@@ -72,8 +72,12 @@ async function importLegacySheet(){
   }catch(e){ setStatus('匯入失敗：'+e.message); }
 }
 /* AI 估算：帶登入 token 給 Apps Script 驗證 */
-async function estimatePost(text){
+async function estimatePost(text,timeoutMs){
   const idToken=await FB.idToken();
-  const r=await fetch(ESTIMATE_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'estimate',text,idToken}),redirect:'follow'});
-  return r.json();
+  const ctl=new AbortController(); const timer=setTimeout(()=>ctl.abort(),timeoutMs||15000);
+  try{
+    const r=await fetch(ESTIMATE_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'estimate',text,idToken}),redirect:'follow',signal:ctl.signal});
+    return await r.json();
+  }catch(e){ if(e.name==='AbortError') throw new Error('等太久沒回應（15 秒）'); throw e; }
+  finally{ clearTimeout(timer); }
 }
