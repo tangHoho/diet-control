@@ -45,14 +45,25 @@ function obCalc(){
   const tdee=bmr*(OB.act+exFactor);
   const goal=t<w-0.5?'lose':(t>w+0.5?'gain':'keep');
   let kcal=goal==='lose'?tdee-OB.pace:(goal==='gain'?tdee+300:tdee);
-  const floor=OB.sex==='m'?1500:1200; if(kcal<floor)kcal=floor; if(goal==='lose'&&kcal<bmr*0.9)kcal=Math.round(bmr*0.9);
+  const floor=Math.max(OB.sex==='m'?1500:1200, goal==='lose'?Math.round(bmr*0.9):0);
+  const floored=goal==='lose'&&kcal<floor; if(floored) kcal=floor;
   kcal=Math.round(kcal/10)*10;
+  const deficit=Math.max(0,Math.round(tdee-kcal));   // 實際每日缺口（套完下限）
   // 蛋白質：減重期以目標體重 2.0 g/kg，維持 1.6，增重 1.8；下限 1.2 g/kg 現體重
   const pro=Math.max(Math.round(t*(goal==='lose'?2.0:goal==='gain'?1.8:1.6)),Math.round(w*1.2));
   Object.assign(OB,{age,height:h,weight:w,target:t,bmr:Math.round(bmr),tdee:Math.round(tdee),goal});
   document.getElementById('obKcalIn').value=kcal;document.getElementById('obProIn').value=pro;
-  document.getElementById('obExplain').textContent=`基礎代謝約 ${Math.round(bmr)} kcal，加上活動量每日消耗約 ${Math.round(tdee)} kcal。`+(goal==='lose'?`目標減到 ${t} kg，每日少吃 ${OB.pace} kcal，約每週減 ${(OB.pace*7/7700).toFixed(1)} kg。`:goal==='gain'?`目標增到 ${t} kg，每日多吃 300 kcal。`:'以維持目前體重為目標。');
-  document.getElementById('obNote').innerHTML=goal==='lose'?'<b>提醒</b>：熱量不建議長期低於基礎代謝的九成，蛋白質吃夠才能在減脂時保住肌肉。每 8–10 週可安排一週吃到維持量。':'<b>提醒</b>：蛋白質分散到每一餐吸收效率較好，每餐至少 25–30g。';
+  let explain=`基礎代謝約 ${Math.round(bmr)} kcal，加上活動量每日消耗約 ${Math.round(tdee)} kcal。`;
+  if(goal==='lose'){
+    explain+=`目標減到 ${t} kg。`;
+    if(floored) explain+=`你選的速度是每日少吃 ${OB.pace} kcal，但那樣只剩 ${Math.round(tdee-OB.pace)} kcal，低於安全下限，所以拉回 ${kcal.toLocaleString()} kcal，實際每日少吃 ${deficit} kcal，約每週減 ${(deficit*7/7700).toFixed(1)} kg。`;
+    else explain+=`每日少吃 ${deficit} kcal，約每週減 ${(deficit*7/7700).toFixed(1)} kg。`;
+  }else if(goal==='gain') explain+=`目標增到 ${t} kg，每日多吃 300 kcal。`;
+  else explain+='以維持目前體重為目標。';
+  document.getElementById('obExplain').textContent=explain;
+  document.getElementById('obNote').innerHTML=goal==='lose'
+    ?(floored?'<b>提醒</b>：每日消耗不高的話，靠少吃能製造的缺口有限。想加快速度，把日常活動量或運動次數提高，比再往下砍熱量安全。':'<b>提醒</b>：熱量不建議長期低於基礎代謝的九成，蛋白質吃夠才能在減脂時保住肌肉。每 8–10 週可安排一週吃到維持量。')
+    :'<b>提醒</b>：蛋白質分散到每一餐吸收效率較好，每餐至少 25–30g。';
   obRecalcPer();
 }
 function obRecalcPer(){const k=+document.getElementById('obKcalIn').value||0,p=+document.getElementById('obProIn').value||0;document.getElementById('obKcal').textContent=k.toLocaleString();document.getElementById('obPro').textContent=p+'g';document.getElementById('obPer').textContent=Math.round(k/OB.meals)+' / '+Math.round(p/OB.meals)+'g';}

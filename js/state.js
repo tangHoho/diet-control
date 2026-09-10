@@ -57,6 +57,7 @@ function applySettings(){
 let meal=[], saved=[], log=[], curCat='主蛋白', chartRange=0, logShow=7;
 const KEY_LOG='hoho_meal_log_v1', KEY_RECIPES='hoho_recipes_v1';
 let user=null;               // 登入中的使用者（Firebase）
+let editingTs=null;          // 正在編輯的紀錄（ts），null 表示新增
 /* 食材兩層：內建 FOODS（id 為數字）+ 自訂 USER_FOODS（id 為 'u…' 字串） */
 const KEY_FOODS='hoho_user_foods_v1';
 let USER_FOODS=load(KEY_FOODS,[]);
@@ -80,4 +81,11 @@ log=load(KEY_LOG,[]);
 function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function normDate(d){const str=String(d).trim();const m=str.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');const dt=new Date(str);if(!isNaN(dt))return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');return str;}
 function normalizeLog(){log.forEach(l=>{l.date=normDate(l.date);l.k=Number(l.k)||0;l.p=Number(l.p)||0;l.cb=Number(l.cb)||0;l.ts=Number(l.ts);});}
+/* App 內建確認框（取代瀏覽器 confirm） */
+function askConfirm(title,msg,onOk,okText){
+  document.getElementById('cfTitle').textContent=title; document.getElementById('cfMsg').textContent=msg||'';
+  const ok=document.getElementById('cfOk'); ok.textContent=okText||'確定';
+  ok.onclick=()=>{closeSheet();onOk();};
+  openSheet('confirm');
+}
 let toastT; function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2200);}

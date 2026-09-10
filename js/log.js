@@ -2,19 +2,36 @@
    飲控紀錄、趨勢圖、明細、備份
    ============================================================ */
 /* ---------- 飲控紀錄 ---------- */
+function checkSlotWarn(){
+  const date=normDate(document.getElementById('logDate').value||todayStr()), slot=document.getElementById('logSlot').value;
+  const dup=slot!=='加餐'&&log.find(l=>l.date===date&&l.slot===slot&&l.ts!==editingTs);
+  const w=document.getElementById('logWarn');
+  w.style.display=dup?'block':'none'; w.textContent=dup?`${date} 的${slot}已有紀錄（${dup.name}，${dup.k} kcal），儲存會取代它。要保留舊的請改選其他餐次或「加餐」。`:'';
+}
 function logMeal(){
   if(!meal.length) return;
   const date=normDate(document.getElementById('logDate').value||todayStr());
   const slot=document.getElementById('logSlot').value;
   const name=document.getElementById('logName').value.trim()||foodOf(meal[0]).n+' 餐';
   const t=totals(meal);
-  const entry={date,slot,name,items:meal.map(m=>m.id!=null?{id:m.id,amt:m.amt,n:foodOf(m).n,u:foodOf(m).u||'g'}:{cid:m.cid,n:m.n,u:m.u||'份',amt:m.amt,k:m.k,p:m.p,cb:m.cb,pending:!!m.pending,src:m.src}),k:Math.round(t.k),p:+t.p.toFixed(1),cb:+t.cb.toFixed(1),ts:Date.now()};
+  // 同一天同餐次只保留一筆（加餐除外）：取代舊的
+  const dup=slot!=='加餐'?log.find(l=>l.date===date&&l.slot===slot&&l.ts!==editingTs):null;
+  if(dup){ log=log.filter(l=>l.ts!==dup.ts); persist.delLog(dup.ts); }
+  const ts=editingTs||Date.now();
+  if(editingTs){ log=log.filter(l=>l.ts!==editingTs); }
+  const entry={date,slot,name,ts,items:meal.map(m=>m.id!=null?{id:m.id,amt:m.amt,n:foodOf(m).n,u:foodOf(m).u||'g'}:{cid:m.cid,n:m.n,u:m.u||'份',amt:m.amt,k:m.k,p:m.p,cb:m.cb,pending:!!m.pending,src:m.src}),k:Math.round(t.k),p:+t.p.toFixed(1),cb:+t.cb.toFixed(1)};
   log.push(entry);persist.addLog(entry);
-  closeSheet();renderLog();renderToday();clearMeal();
-  toast('已紀錄 '+date+' '+slot+(t.pending?'（'+t.pending+' 項待估算）':''));
+  const wasEdit=!!editingTs;
+  closeSheet();clearMeal();renderLog();renderToday();
+  toast((wasEdit?'已更新 ':'已紀錄 ')+date+' '+slot+(dup&&!wasEdit?'（已取代原本的紀錄）':'')+(t.pending?'（'+t.pending+' 項待估算）':''));
 }
-function delLog(ts){if(!confirm('刪除這筆紀錄？'))return;log=log.filter(l=>l.ts!==ts);persist.delLog(ts);renderLog();renderToday();}
-function reloadLog(ts){const l=log.find(x=>x.ts===ts);if(!l)return;meal=l.items.filter(it=>it.id==null||foodExists(it.id)).map(it=>({...it}));setMealName(l.name);renderMeal();showTab('calc');toast('已載入到計算');}
+function editLog(ts){
+  const l=log.find(x=>x.ts===ts); if(!l) return;
+  meal=l.items.filter(it=>it.id==null||foodExists(it.id)).map(it=>({...it}));
+  editingTs=ts; setMealName(l.name); renderMeal(); showTab('calc'); toast('編輯中：修改後按「更新這筆紀錄」');
+}
+function delLog(ts){askConfirm('刪除紀錄','刪除這一餐的紀錄？',()=>{log=log.filter(l=>l.ts!==ts);persist.delLog(ts);renderLog();renderToday();toast('已刪除');},'刪除');}
+function reloadLog(ts){const l=log.find(x=>x.ts===ts);if(!l)return;meal=l.items.filter(it=>it.id==null||foodExists(it.id)).map(it=>({...it}));editingTs=null;setMealName(l.name);renderMeal();showTab('calc');toast('已複製到計算（會存成新的一筆）');}
 function toggleDetail(){const p=document.getElementById('detailPanel');const on=p.style.display==='none';p.style.display=on?'block':'none';document.getElementById('detailBtn').style.display=on?'none':'block';if(on)renderLog();}
 function closeDetail(){logShow=7;document.getElementById('detailPanel').style.display='none';document.getElementById('detailBtn').style.display='block';document.getElementById('logSearch').value='';}
 function showDetail(date){document.getElementById('logSearch').value=date;const p=document.getElementById('detailPanel');p.style.display='block';document.getElementById('detailBtn').style.display='none';renderLog();setTimeout(()=>{const el=document.getElementById('logList');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},50);}
@@ -35,7 +52,7 @@ function renderLog(){
   const shown=dates.slice(0,logShow); const today=todayStr();
   box.innerHTML=shown.map((d,i)=>{const ms=byDate[d].sort((a,b)=>a.ts-b.ts);const K=ms.reduce((a,l)=>a+l.k,0),P=ms.reduce((a,l)=>a+l.p,0);const b=kcalBand();const cls=K>b[1]?'over':(K>=b[0]&&P>=SET.pro?'ok':'');
     const open=(i===0||d===today||q)?' open':'';
-    return `<details class="logday"${open}><summary><div class="dh"><b>${d}</b><span class="n">${ms.length} 餐</span><span class="${cls}">${K} kcal・蛋白 ${P.toFixed(0)}g</span></div></summary>${ms.map(l=>`<div class="item"><div class="info"><div class="name"><span class="tag">${l.slot}</span>${l.name}</div><div class="sub">${l.k} kcal・蛋白 ${l.p.toFixed(0)}g・碳水 ${l.cb.toFixed(0)}g</div><div class="sub">${l.items.map(it=>dn(it.n)+' '+fmtAmt(foodOf(it),it.amt)+(it.pending?'(待估算)':'')).join('、')}</div>${l.items.some(it=>it.pending)?'<div class="sub warn">有項目待估算，熱量未含</div>':''}</div><button class="btn sm sec" onclick="reloadLog(${l.ts})">載入</button><button class="del" onclick="delLog(${l.ts})">×</button></div>`).join('')}</details>`;}).join('')
+    return `<details class="logday"${open}><summary><div class="dh"><b>${d}</b><span class="n">${ms.length} 餐</span><span class="${cls}">${K} kcal・蛋白 ${P.toFixed(0)}g</span></div></summary>${ms.map(l=>`<div class="item"><div class="info"><div class="name"><span class="tag">${l.slot}</span>${l.name}</div><div class="sub">${l.k} kcal・蛋白 ${l.p.toFixed(0)}g・碳水 ${l.cb.toFixed(0)}g</div><div class="sub">${l.items.map(it=>dn(it.n)+' '+fmtAmt(foodOf(it),it.amt)+(it.pending?'(待估算)':'')).join('、')}</div>${l.items.some(it=>it.pending)?'<div class="sub warn">有項目待估算，熱量未含</div>':''}</div><div class="stack" style="gap:4px"><button class="btn sm sec" onclick="editLog(${l.ts})">編輯</button><button class="btn sm ghost" onclick="reloadLog(${l.ts})">複製</button></div><button class="del" onclick="delLog(${l.ts})">×</button></div>`).join('')}</details>`;}).join('')
     +(dates.length>logShow?`<button class="more" onclick="logShow+=10;renderLog()">顯示更早的紀錄（還有 ${dates.length-logShow} 天）</button>`:'');
 }
 function exportLog(){copyText(JSON.stringify({log,saved,exported:new Date().toISOString()}),'備份已複製，貼到備忘錄保存');}

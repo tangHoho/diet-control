@@ -73,7 +73,7 @@
     <div class="metrics" style="margin-bottom:10px">
       <div class="result"><b id="obKcal">0</b><span>kcal / 天</span></div>
       <div class="result"><b id="obPro">0g</b><span>蛋白 / 天</span></div>
-      <div class="result"><b id="obPer">0</b><span>每餐</span></div>
+      <div class="result"><b id="obPer" class="small">0</b><span>每餐 kcal / 蛋白</span></div>
     </div>
     <div class="card form" style="margin-bottom:10px">
       <div class="kv"><div>每日熱量<small>可微調</small></div><input class="field numin" type="number" inputmode="numeric" id="obKcalIn" onchange="obRecalcPer()"></div>
@@ -111,7 +111,7 @@
 
   <div class="card orange">
     <div class="row between">
-      <h3 id="mealTitle">這一餐</h3>
+      <h3 id="mealTitle">這一餐</h3><span class="tag" id="editBadge" style="display:none;background:var(--red)">編輯中</span>
       <button class="btn sm ghost" onclick="clearMeal()">清空</button>
     </div>
     <div class="metrics" style="margin-top:10px">
@@ -133,7 +133,7 @@
       <button class="btn sec" onclick="openSheet('recipes')">載入食譜</button>
     </div>
     <div class="btnrow">
-      <button class="btn" onclick="openSheet('log')">紀錄這一餐</button>
+      <button class="btn" id="logBtn" onclick="openSheet('log')">紀錄這一餐</button>
     </div>
     <div class="btnrow">
       <button class="btn ghost sm" style="flex:1" onclick="saveRecipe()">存成食譜</button>
@@ -146,7 +146,7 @@
 <section class="page" id="page-lib">
   <div class="topbar"><h2>食材庫</h2><div class="row"><span class="muted" id="libCount"></span><button class="btn sm" onclick="openFoodSheet()">＋ 新增食材</button></div></div>
   <div class="search"><input class="field" id="libSearch" placeholder="搜尋食材" oninput="renderLib()"></div>
-  <div class="chips" id="libTabs" style="margin-top:10px"></div>
+  <div class="chips wrap" id="libTabs" style="margin-top:10px"></div>
   <div class="grid" id="libList"></div>
 
   <h3 style="margin:16px 0 8px">五天輪替菜單</h3>
@@ -260,12 +260,18 @@
   <div class="muted" id="extraStatus" style="margin-top:6px;min-height:18px"></div>
   <div class="btnrow"><button class="btn" onclick="addExtra()">估算並加入</button></div>
 </div>
+<div class="sheet" id="sheet-confirm">
+  <h3 id="cfTitle">確認</h3>
+  <p class="muted" id="cfMsg" style="margin:0 0 4px"></p>
+  <div class="btnrow"><button class="btn ghost" onclick="closeSheet()">取消</button><button class="btn" id="cfOk" style="background:var(--red);color:#fff">確定</button></div>
+</div>
 <div class="sheet" id="sheet-food">
-  <h3>新增食材</h3>
+  <h3 id="ufTitle">新增食材</h3>
   <div class="stack">
     <input class="field" id="ufName" placeholder="名稱（例：鮭魚生魚片）">
-    <div class="row"><select class="field" id="ufCat" style="flex:1"></select>
+    <div class="row"><select class="field" id="ufCat" style="flex:1" onchange="ufCatChanged()"></select>
       <select class="field" id="ufUnit" style="flex:1" onchange="ufUnitChanged()"><option value="g">以克計</option><option value="份">以份計</option></select></div>
+    <input class="field" id="ufNewCat" placeholder="輸入新分類名稱（例：飲料、外食）" style="display:none">
     <input class="field" id="ufUnitName" placeholder="單位名稱（份、顆、片、杯…）" style="display:none">
     <div class="muted" id="ufPerLabel"></div>
     <div class="row"><input class="field" type="number" inputmode="decimal" id="ufK" placeholder="kcal"><input class="field" type="number" inputmode="decimal" id="ufP" placeholder="蛋白 g"><input class="field" type="number" inputmode="decimal" id="ufCb" placeholder="碳水 g"></div>
@@ -273,6 +279,7 @@
     <input class="field" id="ufNote" placeholder="備註（選填）">
   </div>
   <div class="btnrow"><button class="btn" onclick="saveUserFood()">儲存</button></div>
+  <button class="btn ghost sm" id="ufDelBtn" style="display:none;margin:10px auto 0;color:var(--red)" onclick="delUserFood()">刪除這個食材</button>
 </div>
 <div class="sheet" id="sheet-recipes">
   <h3>我的食譜</h3>
@@ -283,10 +290,11 @@
   <div class="stack">
     <input class="field" id="logName" placeholder="這一餐的名稱（可留空）">
     <div class="row">
-      <input class="field" type="date" id="logDate" style="flex:1">
-      <select class="field" id="logSlot" style="flex:1"><option value="第一餐">第一餐</option><option value="第二餐">第二餐</option><option value="加餐">加餐</option></select>
+      <input class="field" type="date" id="logDate" style="flex:1" onchange="checkSlotWarn()">
+      <select class="field" id="logSlot" style="flex:1" onchange="checkSlotWarn()"><option value="第一餐">第一餐</option><option value="第二餐">第二餐</option><option value="加餐">加餐</option></select>
     </div>
     <div class="muted" id="logPreview"></div>
+    <div id="logWarn" style="display:none;color:var(--orange);font-size:13px"></div>
   </div>
   <div class="btnrow"><button class="btn" onclick="logMeal()">確認紀錄</button></div>
 </div>

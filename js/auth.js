@@ -15,7 +15,7 @@ function setAuthUI(){
 }
 async function authAction(){
   if(!window.FB||!FB.ready){toast('雲端服務未設定（config.js）');document.getElementById('localModeBtn').style.display='block';return;}
-  if(user){ if(confirm('要登出嗎？雲端紀錄會保留在你的帳號。')){ localMode=false; await FB.signOut(); } return; }
+  if(user){ askConfirm('登出','雲端紀錄會保留在你的帳號，下次登入就回來。',async()=>{ localMode=false; await FB.signOut(); },'登出'); return; }
   manualLogin=true; document.getElementById('loginStatus').textContent='開啟 Google 登入…';
   try{ await FB.signIn(); }catch(e){ toast('登入失敗：'+(e.code||e.message)); document.getElementById('loginStatus').textContent='登入失敗：'+(e.code||e.message); }
 }

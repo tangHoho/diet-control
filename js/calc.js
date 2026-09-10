@@ -29,7 +29,12 @@ function changeAmt(key,dir){const it=meal.find(m=>keyOf(m)===key);if(!it)return;
 function setAmt(key,v){const it=meal.find(m=>keyOf(m)===key);if(!it)return;let n=parseFloat(v);if(isNaN(n)||n<0)n=0;it.amt=n;if(n===0)meal=meal.filter(m=>keyOf(m)!==key);renderMeal();}
 function setCustomNut(key,field,v){const it=meal.find(m=>keyOf(m)===key);if(!it||it.id!=null)return;const n=parseFloat(v);it[field]=isNaN(n)?0:n;if(it.k||it.p||it.cb)it.pending=false;renderMeal();}
 function removeFood(key){meal=meal.filter(m=>keyOf(m)!==key);renderMeal();}
-function clearMeal(){meal=[];document.getElementById('mealTitle').textContent='這一餐';renderMeal();}
+function saveExtraToLib(key){
+  const it=meal.find(m=>keyOf(m)===key); if(!it||it.id!=null) return;
+  openFoodSheet({n:it.n,k:it.k,p:it.p,cb:it.cb,u:it.u||'份'});
+}
+function clearMeal(){meal=[];editingTs=null;setMealName('');renderMeal();}
+function updateLogButton(){const b=document.getElementById('logBtn');if(!b)return;b.textContent=editingTs?'更新這筆紀錄':'紀錄這一餐';const c=document.getElementById('editBadge');if(c)c.style.display=editingTs?'inline-block':'none';}
 
 function quickSearch(q){
   q=q.trim(); const box=document.getElementById('quickResults');
@@ -45,11 +50,12 @@ function renderMeal(){
   setMetric('mCarb',t.cb.toFixed(0),'g',50,t.cb,35,60);
   document.getElementById('picked').innerHTML=meal.map(it=>{const f=foodOf(it);const n=nut(f,it.amt);const key=keyOf(it);
     const sub=it.pending?`<div class="sub warn">待估算，可先填數字</div>`:`<div class="sub">${Math.round(n.k)} kcal・蛋白 ${n.p.toFixed(0)}g・碳水 ${n.cb.toFixed(0)}g</div>`;
-    const edit=f.custom?`<div class="edit"><label><input type="number" inputmode="decimal" placeholder="0" value="${it.k||''}" onchange="setCustomNut('${key}','k',this.value)">kcal</label><label><input type="number" inputmode="decimal" placeholder="0" value="${it.p||''}" onchange="setCustomNut('${key}','p',this.value)">蛋白g</label><label><input type="number" inputmode="decimal" placeholder="0" value="${it.cb||''}" onchange="setCustomNut('${key}','cb',this.value)">碳水g</label></div>`:'';
+    const edit=f.custom?`<div class="edit">${!it.pending?`<button class="btn sm ghost" style="padding:3px 8px;font-size:12px" onclick="saveExtraToLib('${key}')">存入食材庫</button>`:''}<label><input type="number" inputmode="decimal" placeholder="0" value="${it.k||''}" onchange="setCustomNut('${key}','k',this.value)">kcal</label><label><input type="number" inputmode="decimal" placeholder="0" value="${it.p||''}" onchange="setCustomNut('${key}','p',this.value)">蛋白g</label><label><input type="number" inputmode="decimal" placeholder="0" value="${it.cb||''}" onchange="setCustomNut('${key}','cb',this.value)">碳水g</label></div>`:'';
     return `<div class="item" style="flex-wrap:wrap"><div class="info" style="flex:1 1 140px"><div class="name">${dn(f.n)}${f.custom?' <span class="tag">額外</span>':''}</div>${sub}${edit}</div>
       <div class="qty"><button onclick="changeAmt('${key}',-1)">−</button><input type="number" inputmode="decimal" min="0" step="${f.u?1:5}" value="${it.amt}" onchange="setAmt('${key}',this.value)"><em>${f.u||'g'}</em><button onclick="changeAmt('${key}',1)">＋</button></div>
       <button class="del" onclick="removeFood('${key}')">×</button></div>`;}).join('');
   document.getElementById('emptyHint').style.display=meal.length?'none':'block';
+  updateLogButton();
   const pend=meal.filter(m=>m.pending).length; const base=document.getElementById('mealTitle').dataset.name||'這一餐';
   document.getElementById('mealTitle').textContent=base+(pend?`（${pend} 項待估算）`:'');
 }
@@ -79,7 +85,7 @@ function renderRecipes(){const box=document.getElementById('recipeList');
   if(!saved.length){box.innerHTML='<div class="empty">還沒有食譜。組好一餐後按「存成食譜」。</div>';return;}
   box.innerHTML=saved.map((r,i)=>{const t=totals(r.items);return `<div class="item"><div class="info"><div class="name">${r.name}</div><div class="sub">${Math.round(t.k)} kcal・蛋白 ${t.p.toFixed(0)}g・${r.items.map(it=>dn(foodOf(it).n)).join('、')}</div></div><button class="btn sm sec" onclick="loadRecipe(${i})">載入</button><button class="del" onclick="delRecipe(${i})">×</button></div>`;}).join('');}
 function loadRecipe(i){meal=saved[i].items.map(m=>({...m}));setMealName(saved[i].name);renderMeal();closeSheet();toast('已載入');}
-function delRecipe(i){if(!confirm('刪除「'+saved[i].name+'」？'))return;saved.splice(i,1);persist.recipes();renderRecipes();}
+function delRecipe(i){const r=saved[i];askConfirm('刪除食譜','刪除「'+r.name+'」？',()=>{saved.splice(i,1);persist.recipes();openSheet('recipes');},'刪除');}
 function mealText(items,name){const t=totals(items);return (name||'這一餐')+'\n'+items.map(it=>{const f=foodOf(it);return '・'+f.n+' '+fmtAmt(f,it.amt)+(it.pending?'（待估算）':'');}).join('\n')+`\n合計 ${Math.round(t.k)} kcal・蛋白 ${t.p.toFixed(0)}g・碳水 ${t.cb.toFixed(0)}g`;}
 function copyText(txt,msg){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>toast(msg||'已複製'));}else prompt('複製這段文字',txt);}
 function copyMeal(){if(!meal.length){toast('這一餐還沒有食材');return;}copyText(mealText(meal,document.getElementById('mealTitle').dataset.name));}

@@ -12,9 +12,13 @@ function openSheet(id){
   document.querySelectorAll('.sheet').forEach(s=>s.classList.toggle('on',s.id==='sheet-'+id));
   if(id==='recipes') renderRecipes();
   if(id==='log'){const t=totals(meal); if(!meal.length){closeSheet();toast('這一餐還沒有食材');return;}
-    document.getElementById('logDate').value=todayStr();
-    const used=new Set(log.filter(l=>l.date===todayStr()).map(l=>l.slot)); const next=slotNames().find(n=>!used.has(n)); document.getElementById('logSlot').value=next||'加餐';
-    document.getElementById('logPreview').textContent=`${Math.round(t.k)} kcal・蛋白 ${t.p.toFixed(0)}g・碳水 ${t.cb.toFixed(0)}g`+(t.pending?`（${t.pending} 項待估算未計入）`:'');}
+    const editing=editingTs?log.find(l=>l.ts===editingTs):null;
+    document.getElementById('logDate').value=editing?editing.date:todayStr();
+    if(editing){ document.getElementById('logSlot').value=slotNames().includes(editing.slot)?editing.slot:'加餐'; document.getElementById('logName').value=editing.name; }
+    else { const used=new Set(log.filter(l=>l.date===todayStr()).map(l=>l.slot)); const next=slotNames().find(n=>!used.has(n)); document.getElementById('logSlot').value=next||'加餐'; }
+    document.getElementById('logPreview').textContent=`${Math.round(t.k)} kcal・蛋白 ${t.p.toFixed(0)}g・碳水 ${t.cb.toFixed(0)}g`+(t.pending?`（${t.pending} 項待估算未計入）`:'');
+    document.querySelector('#sheet-log h3').textContent=editing?'更新這筆紀錄':'紀錄這一餐';
+    checkSlotWarn();}
 }
 function closeSheet(){document.getElementById('sheetBg').classList.remove('on');document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('on'));}
 
